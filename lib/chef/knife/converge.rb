@@ -1,4 +1,5 @@
 require 'chef/chef_fs/knife'
+require 'chef/application/client'
 
 class Chef
   class Knife
@@ -8,9 +9,10 @@ class Chef
       deps do
         require 'chef'
         require 'chef/log'
-        require 'chef/application/client'
         require 'chef/chef_fs/file_system'
       end
+
+      options.merge!(Chef::Application::Client.options)
 
       option :port,
         :short => '-p',
@@ -25,6 +27,8 @@ class Chef
         if config[:config_file]
           ui.output "Using config file #{config[:config_file]} ..."
         end
+
+        Chef::Config.merge!(config)
 
         self.exit_code = 0
       end
@@ -49,6 +53,7 @@ class Chef
           end
         end
         client = Chef::Application::Client.new
+        client.config = config
         if run_list != ''
           client.config[:override_runlist] = run_list
         end
